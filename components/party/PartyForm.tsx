@@ -28,7 +28,7 @@ interface MemberData {
 }
 
 const defaultMember = (slot: number): MemberData => ({
-  slot, pokemon_id: '', nickname: '', item: '', ability: '', role: '',
+  slot, pokemon_id: '' as any, nickname: '', item: '', ability: '', role: '',
   is_mega: false, nature: 'まじめ',
   move1: '', move2: '', move3: '', move4: '',
   ev_hp: 0, ev_atk: 0, ev_def: 0, ev_spatk: 0, ev_spdef: 0, ev_spe: 0,
@@ -110,7 +110,7 @@ export function PartyForm({ partyId, initialName = '', initialIsActive = false, 
         <div key={m.slot} className="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
           <h3 className="font-semibold text-gray-800">[{m.slot}] スロット {m.slot}</h3>
           <div className="grid grid-cols-2 gap-3">
-            <Field label="図鑑番号" type="number" value={m.pokemon_id} onChange={v => updateMember(m.slot, 'pokemon_id', v === '' ? '' : Number(v))} placeholder="例: 445 (ガブリアス)" />
+            <Field label="図鑑番号" type="number" value={m.pokemon_id === '' ? '' : m.pokemon_id} onChange={v => updateMember(m.slot, 'pokemon_id', v === '' ? '' : Number(v))} placeholder="例: 445 (ガブリアス)" />
             <Field label="ニックネーム" value={m.nickname} onChange={v => updateMember(m.slot, 'nickname', v)} placeholder="省略可" />
             <Field label="持ち物" value={m.item} onChange={v => updateMember(m.slot, 'item', v)} placeholder="例: こだわりスカーフ" />
             <Field label="特性" value={m.ability} onChange={v => updateMember(m.slot, 'ability', v)} placeholder="例: さめはだ" />
