@@ -3,7 +3,7 @@ import { createServerSupabaseClient } from '@/lib/supabase/server'
 export async function buildBattleContext(userId: string): Promise<string> {
   const supabase = await createServerSupabaseClient()
 
-  const [partyRes, battlesRes, weakRes, metaRes] = await Promise.all([
+  const [partyRes, battlesRes, weakRes, metaRes, availableRes] = await Promise.all([
     supabase
       .from('parties')
       .select(`
@@ -35,12 +35,18 @@ export async function buildBattleContext(userId: string): Promise<string> {
       .order('week_start', { ascending: false })
       .limit(1)
       .single(),
+
+    supabase
+      .from('available_pokemon')
+      .select('name_ja')
+      .order('id'),
   ])
 
   const party = partyRes.data
   const recentBattles = battlesRes.data ?? []
   const weakOpponents = weakRes.data ?? []
   const metaNote = metaRes.data
+  const availablePokemon = availableRes.data?.map((p: any) => p.name_ja) ?? []
 
   const winRate = recentBattles.length > 0
     ? Math.round((recentBattles.filter(b => b.result === 'win').length / recentBattles.length) * 100)
@@ -90,6 +96,9 @@ ${weakOpponents.length > 0
 【今週の環境】
 ${metaNote?.content ?? '  環境メモ未記録'}
 ${metaNote?.top_threats ? `  脅威ポケモン: ${(metaNote.top_threats as string[]).join(', ')}` : ''}
+
+【ポケモンチャンピオンズ 使用可能ポケモン一覧（全${availablePokemon.length}匹）】
+${availablePokemon.length > 0 ? availablePokemon.join('、') : '  データなし'}
 
 === ここまでがコンテキスト ===
 `.trim()
