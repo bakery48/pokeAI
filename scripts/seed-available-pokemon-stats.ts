@@ -4,6 +4,10 @@
  */
 
 import { createClient } from '@supabase/supabase-js'
+import { config } from 'dotenv'
+import { resolve } from 'path'
+
+config({ path: resolve(process.cwd(), '.env.local') })
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
