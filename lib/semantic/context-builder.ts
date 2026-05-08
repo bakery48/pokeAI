@@ -38,7 +38,7 @@ export async function buildBattleContext(userId: string): Promise<string> {
 
     supabase
       .from('available_pokemon')
-      .select('name_ja')
+      .select('name_ja, type1, type2, base_hp, base_atk, base_def, base_spatk, base_spdef, base_spe')
       .order('id'),
   ])
 
@@ -46,7 +46,7 @@ export async function buildBattleContext(userId: string): Promise<string> {
   const recentBattles = battlesRes.data ?? []
   const weakOpponents = weakRes.data ?? []
   const metaNote = metaRes.data
-  const availablePokemon = availableRes.data?.map((p: any) => p.name_ja) ?? []
+  const availablePokemon = availableRes.data ?? []
 
   const winRate = recentBattles.length > 0
     ? Math.round((recentBattles.filter(b => b.result === 'win').length / recentBattles.length) * 100)
@@ -98,7 +98,10 @@ ${metaNote?.content ?? '  環境メモ未記録'}
 ${metaNote?.top_threats ? `  脅威ポケモン: ${(metaNote.top_threats as string[]).join(', ')}` : ''}
 
 【ポケモンチャンピオンズ 使用可能ポケモン一覧（全${availablePokemon.length}匹）】
-${availablePokemon.length > 0 ? availablePokemon.join('、') : '  データなし'}
+${availablePokemon.length > 0 ? availablePokemon.map((p: any) => {
+  const type = p.type2 ? `${p.type1}/${p.type2}` : p.type1
+  return `${p.name_ja}（${type ?? '?'}）H${p.base_hp ?? '?'} A${p.base_atk ?? '?'} B${p.base_def ?? '?'} C${p.base_spatk ?? '?'} D${p.base_spdef ?? '?'} S${p.base_spe ?? '?'}`
+}).join('\n') : '  データなし'}
 
 === ここまでがコンテキスト ===
 `.trim()
