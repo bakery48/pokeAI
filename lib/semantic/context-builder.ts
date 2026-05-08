@@ -1,6 +1,7 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { TYPE_CHART_TEXT } from '@/lib/data/type-chart'
 import { DAMAGE_FORMULA_TEXT } from '@/lib/data/damage-formula'
+import { STAT_FORMULA_TEXT } from '@/lib/data/stat-formula'
 import { MOVES_DB_TEXT } from '@/lib/data/moves'
 import { BATTLE_CONDITIONS_TEXT } from '@/lib/data/battle-conditions'
 
@@ -104,6 +105,8 @@ ${metaNote?.top_threats ? `  脅威ポケモン: ${(metaNote.top_threats as stri
 ${TYPE_CHART_TEXT}
 
 ${DAMAGE_FORMULA_TEXT}
+
+${STAT_FORMULA_TEXT}
 
 ${MOVES_DB_TEXT}
 
