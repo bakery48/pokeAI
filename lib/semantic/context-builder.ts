@@ -2,6 +2,7 @@ import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { TYPE_CHART_TEXT } from '@/lib/data/type-chart'
 import { DAMAGE_FORMULA_TEXT } from '@/lib/data/damage-formula'
 import { MOVES_DB_TEXT } from '@/lib/data/moves'
+import { BATTLE_CONDITIONS_TEXT } from '@/lib/data/battle-conditions'
 
 export async function buildBattleContext(userId: string): Promise<string> {
   const supabase = await createServerSupabaseClient()
@@ -105,6 +106,8 @@ ${TYPE_CHART_TEXT}
 ${DAMAGE_FORMULA_TEXT}
 
 ${MOVES_DB_TEXT}
+
+${BATTLE_CONDITIONS_TEXT}
 
 【ポケモンチャンピオンズ 使用可能ポケモン一覧（全${availablePokemon.length}匹）】
 ${availablePokemon.length > 0 ? availablePokemon.map((p: any) => {
