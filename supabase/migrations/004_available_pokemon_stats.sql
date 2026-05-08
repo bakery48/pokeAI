@@ -1,0 +1,11 @@
+-- available_pokemon に種族値・タイプを追加
+ALTER TABLE available_pokemon
+  ADD COLUMN IF NOT EXISTS type1      TEXT,
+  ADD COLUMN IF NOT EXISTS type2      TEXT,
+  ADD COLUMN IF NOT EXISTS base_hp    INTEGER,
+  ADD COLUMN IF NOT EXISTS base_atk   INTEGER,
+  ADD COLUMN IF NOT EXISTS base_def   INTEGER,
+  ADD COLUMN IF NOT EXISTS base_spatk INTEGER,
+  ADD COLUMN IF NOT EXISTS base_spdef INTEGER,
+  ADD COLUMN IF NOT EXISTS base_spe   INTEGER,
+  ADD COLUMN IF NOT EXISTS pokeapi_slug TEXT;

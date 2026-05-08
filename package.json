@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "seed:pokemon": "npx tsx scripts/seed-pokemon-master.ts"
+    "seed:pokemon": "npx tsx scripts/seed-pokemon-master.ts",
+    "seed:stats": "npx tsx scripts/seed-available-pokemon-stats.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.95.1",
