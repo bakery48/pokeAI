@@ -1,6 +1,7 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { TYPE_CHART_TEXT } from '@/lib/data/type-chart'
 import { DAMAGE_FORMULA_TEXT } from '@/lib/data/damage-formula'
+import { MOVES_DB_TEXT } from '@/lib/data/moves'
 
 export async function buildBattleContext(userId: string): Promise<string> {
   const supabase = await createServerSupabaseClient()
@@ -102,6 +103,8 @@ ${metaNote?.top_threats ? `  脅威ポケモン: ${(metaNote.top_threats as stri
 ${TYPE_CHART_TEXT}
 
 ${DAMAGE_FORMULA_TEXT}
+
+${MOVES_DB_TEXT}
 
 【ポケモンチャンピオンズ 使用可能ポケモン一覧（全${availablePokemon.length}匹）】
 ${availablePokemon.length > 0 ? availablePokemon.map((p: any) => {
