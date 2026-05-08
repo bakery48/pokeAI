@@ -1,0 +1,1 @@
+Namespace("jp.gamewith.walkthrough.recaptcha-hidden").apply(()=>{const e=document.createElement("style");e.innerText=".grecaptcha-badge { visibility: hidden; }",document.head.appendChild(e)});
