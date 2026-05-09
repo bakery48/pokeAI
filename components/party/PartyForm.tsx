@@ -185,40 +185,84 @@ export function PartyForm({ partyId, initialName = '', initialIsActive = false, 
   )
 }
 
+function toKatakana(str: string): string {
+  return str.replace(/[ぁ-ゖ]/g, c => String.fromCharCode(c.charCodeAt(0) + 0x60))
+}
+
 function PokemonSelect({ value, onChange, options }: {
   value: number | ''
   onChange: (v: number | '') => void
   options: AvailablePokemon[]
 }) {
-  const selected = options.find(p => p.id === value)
-  const listId = useRef(`pokemon-list-${Math.random().toString(36).slice(2)}`).current
+  const [query, setQuery] = useState('')
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const name = e.target.value
-    const match = options.find(p => p.name_ja === name)
-    if (match) onChange(match.id)
-    else if (name === '') onChange('')
+  const selected = options.find(p => p.id === value)
+
+  const filtered = query.length === 0
+    ? options.slice(0, 30)
+    : options.filter(p => p.name_ja.includes(toKatakana(query))).slice(0, 30)
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [])
+
+  function select(p: AvailablePokemon) {
+    onChange(p.id)
+    setQuery('')
+    setOpen(false)
+  }
+
+  function clear() {
+    onChange('')
+    setQuery('')
+    setOpen(false)
   }
 
   return (
-    <div className="col-span-2">
+    <div ref={ref} className="relative col-span-2">
       <label className="block text-xs text-gray-500 mb-1">ポケモン</label>
-      <input
-        list={listId}
-        defaultValue={selected?.name_ja ?? ''}
-        key={selected?.id ?? 'empty'}
-        onChange={handleChange}
-        placeholder="ポケモン名を入力（例: ガブリアス）"
-        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-      />
-      {selected && (
-        <p className="mt-1 text-xs text-gray-400">
-          {[selected.type1, selected.type2].filter(Boolean).join('/')}
-        </p>
+      {selected && !open ? (
+        <div className="flex items-center gap-2 border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white">
+          <span className="flex-1 font-medium text-gray-800">
+            {selected.name_ja}
+            <span className="ml-2 text-xs text-gray-400">
+              {[selected.type1, selected.type2].filter(Boolean).join('/')}
+            </span>
+          </span>
+          <button type="button" onClick={clear} className="text-gray-400 hover:text-gray-600 text-xs">変更</button>
+        </div>
+      ) : (
+        <input
+          value={query}
+          onChange={e => { setQuery(e.target.value); setOpen(true) }}
+          onFocus={() => setOpen(true)}
+          placeholder="ひらがな・カタカナで検索（例: がぶりあす）"
+          autoComplete="off"
+          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        />
       )}
-      <datalist id={listId}>
-        {options.map(p => <option key={p.id} value={p.name_ja} />)}
-      </datalist>
+      {open && (
+        <ul className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+          {filtered.length > 0 ? filtered.map(p => (
+            <li
+              key={p.id}
+              onMouseDown={() => select(p)}
+              className="flex items-center justify-between px-3 py-2 text-sm hover:bg-indigo-50 cursor-pointer"
+            >
+              <span className="font-medium text-gray-800">{p.name_ja}</span>
+              <span className="text-xs text-gray-400">{[p.type1, p.type2].filter(Boolean).join('/')}</span>
+            </li>
+          )) : (
+            <li className="px-3 py-2 text-sm text-gray-400">見つかりません</li>
+          )}
+        </ul>
+      )}
     </div>
   )
 }
