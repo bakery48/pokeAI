@@ -1,10 +1,17 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 
 const NATURES = ['さみしがり','やんちゃ','ゆうかん','いじっぱり','ひかえめ','おだやか','なまいき','おくびょう','うっかりや','のんき','わんぱく','のうてんき','おとなしい','しんちょう','れいせい','むじゃき','てれや','おっとり','きまぐれ','まじめ']
 const ROLES = ['エース', 'リード', '受け', 'セッター', 'スイーパー']
+
+interface AvailablePokemon {
+  id: number
+  name_ja: string
+  type1: string | null
+  type2: string | null
+}
 
 interface MemberData {
   slot: number
@@ -50,6 +57,13 @@ export function PartyForm({ partyId, initialName = '', initialIsActive = false, 
   )
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [availablePokemon, setAvailablePokemon] = useState<AvailablePokemon[]>([])
+
+  useEffect(() => {
+    fetch('/api/available-pokemon')
+      .then(r => r.json())
+      .then(data => setAvailablePokemon(Array.isArray(data) ? data : []))
+  }, [])
 
   function updateMember(slot: number, field: keyof MemberData, value: any) {
     setMembers(prev => prev.map(m => m.slot === slot ? { ...m, [field]: value } : m))
@@ -110,7 +124,11 @@ export function PartyForm({ partyId, initialName = '', initialIsActive = false, 
         <div key={m.slot} className="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
           <h3 className="font-semibold text-gray-800">[{m.slot}] スロット {m.slot}</h3>
           <div className="grid grid-cols-2 gap-3">
-            <Field label="図鑑番号" type="number" value={m.pokemon_id === '' ? '' : m.pokemon_id} onChange={v => updateMember(m.slot, 'pokemon_id', v === '' ? '' : Number(v))} placeholder="例: 445 (ガブリアス)" />
+            <PokemonSelect
+              value={m.pokemon_id}
+              onChange={v => updateMember(m.slot, 'pokemon_id', v)}
+              options={availablePokemon}
+            />
             <Field label="ニックネーム" value={m.nickname} onChange={v => updateMember(m.slot, 'nickname', v)} placeholder="省略可" />
             <Field label="持ち物" value={m.item} onChange={v => updateMember(m.slot, 'item', v)} placeholder="例: こだわりスカーフ" />
             <Field label="特性" value={m.ability} onChange={v => updateMember(m.slot, 'ability', v)} placeholder="例: さめはだ" />
@@ -164,6 +182,85 @@ export function PartyForm({ partyId, initialName = '', initialIsActive = false, 
         )}
       </div>
     </form>
+  )
+}
+
+function PokemonSelect({ value, onChange, options }: {
+  value: number | ''
+  onChange: (v: number | '') => void
+  options: AvailablePokemon[]
+}) {
+  const [query, setQuery] = useState('')
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  const selected = options.find(p => p.id === value)
+
+  const filtered = query.length === 0
+    ? []
+    : options.filter(p => p.name_ja.includes(query)).slice(0, 20)
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [])
+
+  function select(p: AvailablePokemon) {
+    onChange(p.id)
+    setQuery('')
+    setOpen(false)
+  }
+
+  function clear() {
+    onChange('')
+    setQuery('')
+  }
+
+  return (
+    <div ref={ref} className="relative col-span-2">
+      <label className="block text-xs text-gray-500 mb-1">ポケモン</label>
+      {selected && !open ? (
+        <div className="flex items-center gap-2 border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white">
+          <span className="flex-1 font-medium text-gray-800">
+            {selected.name_ja}
+            <span className="ml-2 text-xs text-gray-400">
+              {[selected.type1, selected.type2].filter(Boolean).join('/')}
+            </span>
+          </span>
+          <button type="button" onClick={clear} className="text-gray-400 hover:text-gray-600 text-xs">変更</button>
+        </div>
+      ) : (
+        <input
+          value={query}
+          onChange={e => { setQuery(e.target.value); setOpen(true) }}
+          onFocus={() => setOpen(true)}
+          placeholder="ポケモン名で検索（例: ガブリアス）"
+          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        />
+      )}
+      {open && filtered.length > 0 && (
+        <ul className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+          {filtered.map(p => (
+            <li
+              key={p.id}
+              onMouseDown={() => select(p)}
+              className="flex items-center justify-between px-3 py-2 text-sm hover:bg-indigo-50 cursor-pointer"
+            >
+              <span className="font-medium text-gray-800">{p.name_ja}</span>
+              <span className="text-xs text-gray-400">{[p.type1, p.type2].filter(Boolean).join('/')}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+      {open && query.length > 0 && filtered.length === 0 && (
+        <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow px-3 py-2 text-sm text-gray-400">
+          見つかりません
+        </div>
+      )}
+    </div>
   )
 }
 

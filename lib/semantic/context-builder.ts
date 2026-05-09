@@ -19,7 +19,7 @@ export async function buildBattleContext(userId: string): Promise<string> {
           slot, role, item, ability, is_mega, nature,
           move1, move2, move3, move4,
           ev_hp, ev_atk, ev_def, ev_spatk, ev_spdef, ev_spe,
-          pokemon_master ( name_ja, type1, type2, base_hp, base_atk, base_def, base_spatk, base_spdef, base_spe )
+          available_pokemon ( name_ja, type1, type2, base_hp, base_atk, base_def, base_spatk, base_spdef, base_spe )
         )
       `)
       .eq('user_id', userId)
@@ -69,7 +69,7 @@ export async function buildBattleContext(userId: string): Promise<string> {
   const partyDescription = party?.party_members
     ?.sort((a: any, b: any) => a.slot - b.slot)
     .map((m: any) => {
-      const p = m.pokemon_master
+      const p = m.available_pokemon
       const name = m.is_mega ? `メガ${p.name_ja}` : p.name_ja
       const moves = [m.move1, m.move2, m.move3, m.move4].filter(Boolean).join('/')
       const evSummary = buildEvSummary(m)
