@@ -5,6 +5,7 @@ import { STAT_FORMULA_TEXT } from '@/lib/data/stat-formula'
 import { MOVES_DB_TEXT } from '@/lib/data/moves'
 import { ABILITIES_DB_TEXT } from '@/lib/data/abilities'
 import { BATTLE_CONDITIONS_TEXT } from '@/lib/data/battle-conditions'
+import { BATTLE_THEORY_TEXT } from '@/lib/data/battle-theory'
 
 export async function buildBattleContext(userId: string): Promise<string> {
   const supabase = await createServerSupabaseClient()
@@ -114,6 +115,8 @@ ${MOVES_DB_TEXT}
 ${ABILITIES_DB_TEXT}
 
 ${BATTLE_CONDITIONS_TEXT}
+
+${BATTLE_THEORY_TEXT}
 
 【ポケモンチャンピオンズ 使用可能ポケモン一覧（全${availablePokemon.length}匹）】
 ${availablePokemon.length > 0 ? availablePokemon.map((p: any) => {
