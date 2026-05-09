@@ -1,0 +1,4 @@
+ALTER TABLE available_pokemon
+  ADD COLUMN IF NOT EXISTS ability1 TEXT,
+  ADD COLUMN IF NOT EXISTS ability2 TEXT,
+  ADD COLUMN IF NOT EXISTS ability_hidden TEXT;

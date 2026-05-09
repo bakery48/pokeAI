@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import { ITEM_NAMES } from '@/lib/data/item-names'
+import { MOVE_NAMES } from '@/lib/data/move-names'
 
 const NATURES = ['さみしがり','やんちゃ','ゆうかん','いじっぱり','ひかえめ','おだやか','なまいき','おくびょう','うっかりや','のんき','わんぱく','のうてんき','おとなしい','しんちょう','れいせい','むじゃき','てれや','おっとり','きまぐれ','まじめ']
 const ROLES = ['エース', 'リード', '受け', 'セッター', 'スイーパー']
@@ -11,6 +13,9 @@ interface AvailablePokemon {
   name_ja: string
   type1: string | null
   type2: string | null
+  ability1: string | null
+  ability2: string | null
+  ability_hidden: string | null
 }
 
 interface MemberData {
@@ -69,6 +74,13 @@ export function PartyForm({ partyId, initialName = '', initialIsActive = false, 
     setMembers(prev => prev.map(m => m.slot === slot ? { ...m, [field]: value } : m))
   }
 
+  function handlePokemonSelect(slot: number, pokemonId: number | '') {
+    setMembers(prev => prev.map(m => {
+      if (m.slot !== slot) return m
+      return { ...m, pokemon_id: pokemonId, ability: '' }
+    }))
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!name.trim()) { setError('パーティ名を入力してください'); return }
@@ -120,56 +132,93 @@ export function PartyForm({ partyId, initialName = '', initialIsActive = false, 
         </label>
       </div>
 
-      {members.map(m => (
-        <div key={m.slot} className="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
-          <h3 className="font-semibold text-gray-800">[{m.slot}] スロット {m.slot}</h3>
-          <div className="grid grid-cols-2 gap-3">
-            <PokemonSelect
-              value={m.pokemon_id}
-              onChange={v => updateMember(m.slot, 'pokemon_id', v)}
-              options={availablePokemon}
-            />
-            <Field label="ニックネーム" value={m.nickname} onChange={v => updateMember(m.slot, 'nickname', v)} placeholder="省略可" />
-            <Field label="持ち物" value={m.item} onChange={v => updateMember(m.slot, 'item', v)} placeholder="例: こだわりスカーフ" />
-            <Field label="特性" value={m.ability} onChange={v => updateMember(m.slot, 'ability', v)} placeholder="例: さめはだ" />
-            <div>
-              <label className="block text-xs text-gray-500 mb-1">役割</label>
-              <select value={m.role} onChange={e => updateMember(m.slot, 'role', e.target.value)} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                <option value="">-</option>
-                {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
-              </select>
+      {members.map(m => {
+        const selectedPokemon = availablePokemon.find(p => p.id === m.pokemon_id)
+        const abilityOptions = selectedPokemon
+          ? [selectedPokemon.ability1, selectedPokemon.ability2, selectedPokemon.ability_hidden].filter(Boolean) as string[]
+          : []
+
+        return (
+          <div key={m.slot} className="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
+            <h3 className="font-semibold text-gray-800">[{m.slot}] スロット {m.slot}</h3>
+            <div className="grid grid-cols-2 gap-3">
+              <PokemonSelect
+                value={m.pokemon_id}
+                onChange={v => handlePokemonSelect(m.slot, v)}
+                options={availablePokemon}
+              />
+              <Field label="ニックネーム" value={m.nickname} onChange={v => updateMember(m.slot, 'nickname', v)} placeholder="省略可" />
+              <AutocompleteInput
+                label="持ち物"
+                value={m.item}
+                onChange={v => updateMember(m.slot, 'item', v)}
+                candidates={ITEM_NAMES}
+                placeholder="例: こだわりスカーフ"
+              />
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">特性</label>
+                {abilityOptions.length > 0 ? (
+                  <select
+                    value={m.ability}
+                    onChange={e => updateMember(m.slot, 'ability', e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  >
+                    <option value="">-</option>
+                    {abilityOptions.map(a => <option key={a} value={a}>{a}</option>)}
+                  </select>
+                ) : (
+                  <input
+                    value={m.ability}
+                    onChange={e => updateMember(m.slot, 'ability', e.target.value)}
+                    placeholder="例: さめはだ"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                )}
+              </div>
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">役割</label>
+                <select value={m.role} onChange={e => updateMember(m.slot, 'role', e.target.value)} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                  <option value="">-</option>
+                  {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">性格</label>
+                <select value={m.nature} onChange={e => updateMember(m.slot, 'nature', e.target.value)} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                  {NATURES.map(n => <option key={n} value={n}>{n}</option>)}
+                </select>
+              </div>
             </div>
-            <div>
-              <label className="block text-xs text-gray-500 mb-1">性格</label>
-              <select value={m.nature} onChange={e => updateMember(m.slot, 'nature', e.target.value)} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                {NATURES.map(n => <option key={n} value={n}>{n}</option>)}
-              </select>
-            </div>
-          </div>
-          <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
-            <input type="checkbox" checked={m.is_mega} onChange={e => updateMember(m.slot, 'is_mega', e.target.checked)} className="rounded" />
-            メガシンカあり
-          </label>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="わざ1" value={m.move1} onChange={v => updateMember(m.slot, 'move1', v)} />
-            <Field label="わざ2" value={m.move2} onChange={v => updateMember(m.slot, 'move2', v)} />
-            <Field label="わざ3" value={m.move3} onChange={v => updateMember(m.slot, 'move3', v)} />
-            <Field label="わざ4" value={m.move4} onChange={v => updateMember(m.slot, 'move4', v)} />
-          </div>
-          <div>
-            <p className="text-xs font-medium text-gray-500 mb-2">努力値 (合計: {m.ev_hp+m.ev_atk+m.ev_def+m.ev_spatk+m.ev_spdef+m.ev_spe})</p>
-            <div className="grid grid-cols-3 gap-2">
-              {(['ev_hp','ev_atk','ev_def','ev_spatk','ev_spdef','ev_spe'] as const).map(key => (
-                <div key={key}>
-                  <label className="block text-xs text-gray-400 mb-0.5">{EV_LABELS[key]}</label>
-                  <input type="number" min={0} max={252} value={m[key]} onChange={e => updateMember(m.slot, key, Number(e.target.value))}
-                    className="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500" />
-                </div>
+            <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
+              <input type="checkbox" checked={m.is_mega} onChange={e => updateMember(m.slot, 'is_mega', e.target.checked)} className="rounded" />
+              メガシンカあり
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              {(['move1','move2','move3','move4'] as const).map((key, i) => (
+                <AutocompleteInput
+                  key={key}
+                  label={`わざ${i + 1}`}
+                  value={m[key]}
+                  onChange={v => updateMember(m.slot, key, v)}
+                  candidates={MOVE_NAMES}
+                />
               ))}
             </div>
+            <div>
+              <p className="text-xs font-medium text-gray-500 mb-2">努力値 (合計: {m.ev_hp+m.ev_atk+m.ev_def+m.ev_spatk+m.ev_spdef+m.ev_spe})</p>
+              <div className="grid grid-cols-3 gap-2">
+                {(['ev_hp','ev_atk','ev_def','ev_spatk','ev_spdef','ev_spe'] as const).map(key => (
+                  <div key={key}>
+                    <label className="block text-xs text-gray-400 mb-0.5">{EV_LABELS[key]}</label>
+                    <input type="number" min={0} max={252} value={m[key]} onChange={e => updateMember(m.slot, key, Number(e.target.value))}
+                      className="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
-        </div>
-      ))}
+        )
+      })}
 
       <div className="flex gap-3">
         <button type="submit" disabled={saving} className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-lg font-medium transition-colors">
@@ -261,6 +310,57 @@ function PokemonSelect({ value, onChange, options }: {
           )) : (
             <li className="px-3 py-2 text-sm text-gray-400">見つかりません</li>
           )}
+        </ul>
+      )}
+    </div>
+  )
+}
+
+function AutocompleteInput({ label, value, onChange, candidates, placeholder }: {
+  label: string
+  value: string
+  onChange: (v: string) => void
+  candidates: string[]
+  placeholder?: string
+}) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  const query = value
+  const filtered = query.length === 0
+    ? []
+    : candidates.filter(c => c.includes(toKatakana(query)) || c.includes(query)).slice(0, 20)
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [])
+
+  return (
+    <div ref={ref} className="relative">
+      <label className="block text-xs text-gray-500 mb-1">{label}</label>
+      <input
+        value={value}
+        onChange={e => { onChange(e.target.value); setOpen(true) }}
+        onFocus={() => setOpen(true)}
+        placeholder={placeholder}
+        autoComplete="off"
+        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+      />
+      {open && filtered.length > 0 && (
+        <ul className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+          {filtered.map(c => (
+            <li
+              key={c}
+              onMouseDown={() => { onChange(c); setOpen(false) }}
+              className="px-3 py-2 text-sm hover:bg-indigo-50 cursor-pointer"
+            >
+              {c}
+            </li>
+          ))}
         </ul>
       )}
     </div>
