@@ -3,6 +3,7 @@ import { TYPE_CHART_TEXT } from '@/lib/data/type-chart'
 import { DAMAGE_FORMULA_TEXT } from '@/lib/data/damage-formula'
 import { STAT_FORMULA_TEXT } from '@/lib/data/stat-formula'
 import { MOVES_DB_TEXT } from '@/lib/data/moves'
+import { ABILITIES_DB_TEXT } from '@/lib/data/abilities'
 import { BATTLE_CONDITIONS_TEXT } from '@/lib/data/battle-conditions'
 
 export async function buildBattleContext(userId: string): Promise<string> {
@@ -109,6 +110,8 @@ ${DAMAGE_FORMULA_TEXT}
 ${STAT_FORMULA_TEXT}
 
 ${MOVES_DB_TEXT}
+
+${ABILITIES_DB_TEXT}
 
 ${BATTLE_CONDITIONS_TEXT}
 
