@@ -190,76 +190,35 @@ function PokemonSelect({ value, onChange, options }: {
   onChange: (v: number | '') => void
   options: AvailablePokemon[]
 }) {
-  const [query, setQuery] = useState('')
-  const [open, setOpen] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
-
   const selected = options.find(p => p.id === value)
+  const listId = useRef(`pokemon-list-${Math.random().toString(36).slice(2)}`).current
 
-  const filtered = query.length === 0
-    ? []
-    : options.filter(p => p.name_ja.includes(query)).slice(0, 20)
-
-  useEffect(() => {
-    function handleClick(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
-    }
-    document.addEventListener('mousedown', handleClick)
-    return () => document.removeEventListener('mousedown', handleClick)
-  }, [])
-
-  function select(p: AvailablePokemon) {
-    onChange(p.id)
-    setQuery('')
-    setOpen(false)
-  }
-
-  function clear() {
-    onChange('')
-    setQuery('')
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const name = e.target.value
+    const match = options.find(p => p.name_ja === name)
+    if (match) onChange(match.id)
+    else if (name === '') onChange('')
   }
 
   return (
-    <div ref={ref} className="relative col-span-2">
+    <div className="col-span-2">
       <label className="block text-xs text-gray-500 mb-1">ポケモン</label>
-      {selected && !open ? (
-        <div className="flex items-center gap-2 border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white">
-          <span className="flex-1 font-medium text-gray-800">
-            {selected.name_ja}
-            <span className="ml-2 text-xs text-gray-400">
-              {[selected.type1, selected.type2].filter(Boolean).join('/')}
-            </span>
-          </span>
-          <button type="button" onClick={clear} className="text-gray-400 hover:text-gray-600 text-xs">変更</button>
-        </div>
-      ) : (
-        <input
-          value={query}
-          onChange={e => { setQuery(e.target.value); setOpen(true) }}
-          onFocus={() => setOpen(true)}
-          placeholder="ポケモン名で検索（例: ガブリアス）"
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-        />
+      <input
+        list={listId}
+        defaultValue={selected?.name_ja ?? ''}
+        key={selected?.id ?? 'empty'}
+        onChange={handleChange}
+        placeholder="ポケモン名を入力（例: ガブリアス）"
+        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+      />
+      {selected && (
+        <p className="mt-1 text-xs text-gray-400">
+          {[selected.type1, selected.type2].filter(Boolean).join('/')}
+        </p>
       )}
-      {open && filtered.length > 0 && (
-        <ul className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
-          {filtered.map(p => (
-            <li
-              key={p.id}
-              onMouseDown={() => select(p)}
-              className="flex items-center justify-between px-3 py-2 text-sm hover:bg-indigo-50 cursor-pointer"
-            >
-              <span className="font-medium text-gray-800">{p.name_ja}</span>
-              <span className="text-xs text-gray-400">{[p.type1, p.type2].filter(Boolean).join('/')}</span>
-            </li>
-          ))}
-        </ul>
-      )}
-      {open && query.length > 0 && filtered.length === 0 && (
-        <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow px-3 py-2 text-sm text-gray-400">
-          見つかりません
-        </div>
-      )}
+      <datalist id={listId}>
+        {options.map(p => <option key={p.id} value={p.name_ja} />)}
+      </datalist>
     </div>
   )
 }
