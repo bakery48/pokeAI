@@ -23,6 +23,8 @@ const NAME_MAP: Record<string, string> = {
   'フシギバナ': 'venusaur',
   'メガフシギバナ': 'venusaur-mega',
   'リザードン': 'charizard',
+  'メガリザードンX': 'charizard-mega-x',
+  'メガリザードンY': 'charizard-mega-y',
   'カメックス': 'blastoise',
   'メガカメックス': 'blastoise-mega',
   'スピアー': 'beedrill',
