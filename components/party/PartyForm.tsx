@@ -256,8 +256,8 @@ function PokemonSelect({ value, onChange, options }: {
   const selected = options.find(p => p.id === value)
 
   const filtered = query.length === 0
-    ? options.slice(0, 30)
-    : options.filter(p => p.name_ja.includes(toKatakana(query))).slice(0, 30)
+    ? options
+    : options.filter(p => p.name_ja.includes(toKatakana(query))).slice(0, 50)
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
