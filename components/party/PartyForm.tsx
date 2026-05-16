@@ -16,6 +16,12 @@ interface AvailablePokemon {
   ability1: string | null
   ability2: string | null
   ability_hidden: string | null
+  national_dex_id: number | null
+}
+
+function spriteUrl(p: AvailablePokemon) {
+  if (!p.national_dex_id) return null
+  return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${p.national_dex_id}.png`
 }
 
 interface MemberData {
@@ -278,6 +284,9 @@ function PokemonSelect({ value, onChange, options }: {
       <label className="block text-xs text-gray-500 mb-1">ポケモン</label>
       {selected && !open ? (
         <div onClick={() => setOpen(true)} className="flex items-center gap-2 border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white cursor-pointer hover:border-indigo-400">
+          {spriteUrl(selected) && (
+            <img src={spriteUrl(selected)!} alt="" className="w-8 h-8 object-contain" />
+          )}
           <span className="flex-1 font-medium text-gray-800">
             {selected.name_ja}
             <span className="ml-2 text-xs text-gray-400">
@@ -302,9 +311,12 @@ function PokemonSelect({ value, onChange, options }: {
             <li
               key={p.id}
               onMouseDown={() => select(p)}
-              className="flex items-center justify-between px-3 py-2 text-sm hover:bg-indigo-50 cursor-pointer"
+              className="flex items-center gap-2 px-3 py-1 text-sm hover:bg-indigo-50 cursor-pointer"
             >
-              <span className="font-medium text-gray-800">{p.name_ja}</span>
+              {spriteUrl(p) && (
+                <img src={spriteUrl(p)!} alt="" className="w-8 h-8 object-contain flex-shrink-0" />
+              )}
+              <span className="font-medium text-gray-800 flex-1">{p.name_ja}</span>
               <span className="text-xs text-gray-400">{[p.type1, p.type2].filter(Boolean).join('/')}</span>
             </li>
           )) : (

@@ -288,6 +288,7 @@ const NAME_MAP: Record<string, string> = {
 async function fetchStats(slug: string): Promise<{
   type1: string; type2: string | null
   hp: number; atk: number; def: number; spatk: number; spdef: number; spe: number
+  national_dex_id: number
 } | null> {
   try {
     const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${slug}`)
@@ -306,6 +307,7 @@ async function fetchStats(slug: string): Promise<{
       spatk: statsMap['special-attack'],
       spdef: statsMap['special-defense'],
       spe: statsMap['speed'],
+      national_dex_id: data.id,
     }
   } catch {
     return null
@@ -340,6 +342,7 @@ async function main() {
         base_spdef: stats.spdef,
         base_spe: stats.spe,
         pokeapi_slug: slug,
+        national_dex_id: stats.national_dex_id,
       })
       .eq('name_ja', nameJa)
 
