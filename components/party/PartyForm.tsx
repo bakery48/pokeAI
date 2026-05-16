@@ -277,7 +277,7 @@ function PokemonSelect({ value, onChange, options }: {
     <div ref={ref} className="relative col-span-2">
       <label className="block text-xs text-gray-500 mb-1">ポケモン</label>
       {selected && !open ? (
-        <div className="flex items-center gap-2 border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white">
+        <div onClick={() => setOpen(true)} className="flex items-center gap-2 border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white cursor-pointer hover:border-indigo-400">
           <span className="flex-1 font-medium text-gray-800">
             {selected.name_ja}
             <span className="ml-2 text-xs text-gray-400">
